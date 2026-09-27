@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SnapPDF – Image to PDF Converter</title>
+  <meta name="description" content="Combine JPG, PNG and WebP images into one PDF. Reorder, rotate, choose page size. Works offline – files never leave your PC.">
+  <meta name="theme-color" content="#e5484d">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon-192.png" alt="" width="28" height="28">
+      <span>SnapPDF</span>
+    </div>
+    <span class="tag">100% offline · files never leave your PC</span>
+  </header>
+
+  <main class="layout">
+    <section>
+      <label id="drop" class="drop" tabindex="0">
+        <input id="picker" type="file" accept="image/*" multiple hidden>
+        <div class="drop-inner">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6m0 0-3 3m3-3 3 3"/></svg>
+          <strong>Drop images here</strong>
+          <span>or click to choose · Ctrl+V to paste · JPG, PNG, WebP, GIF, BMP</span>
+        </div>
+      </label>
+
+      <div class="listbar">
+        <span id="count">No pages yet</span>
+        <div class="btns">
+          <button id="sortName" class="ghost" disabled>Sort A–Z</button>
+          <button id="reverse" class="ghost" disabled>Reverse</button>
+          <button id="clear" class="ghost" disabled>Clear all</button>
+        </div>
+      </div>
+      <ul id="grid" class="grid"></ul>
+      <p id="empty" class="empty">Drag pages to reorder them. Use ⟳ to rotate.</p>
+    </section>
+
+    <aside class="panel">
+      <h2>PDF settings</h2>
+
+      <label class="field">Page size
+        <select id="size">
+          <option value="a4" selected>A4</option>
+          <option value="letter">US Letter</option>
+          <option value="legal">US Legal</option>
+          <option value="a5">A5</option>
+          <option value="fit">Same as image</option>
+        </select>
+      </label>
+
+      <label class="field" id="orientField">Orientation
+        <select id="orient">
+          <option value="auto" selected>Auto (match each image)</option>
+          <option value="p">Portrait</option>
+          <option value="l">Landscape</option>
+        </select>
+      </label>
+
+      <label class="field" id="marginField">Margin
+        <select id="margin">
+          <option value="0">None</option>
+          <option value="20" selected>Small</option>
+          <option value="40">Large</option>
+        </select>
+      </label>
+
+      <label class="field">Image quality <output id="qualityOut">85</output>
+        <input id="quality" type="range" min="30" max="100" value="85">
+      </label>
+
+      <label class="field">File name
+        <input id="fname" type="text" value="images" placeholder="images">
+      </label>
+
+      <button id="make" class="primary" disabled>Create PDF</button>
+      <div id="summary" class="summary" hidden></div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
