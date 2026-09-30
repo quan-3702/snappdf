@@ -40,7 +40,7 @@ body { margin: 0; font: 14px/1.5 "Segoe UI", system-ui, sans-serif; background: 
 .field { display: flex; flex-direction: column; gap: 4px; font-weight: 500; }
 .field[hidden] { display: none; }
 .field output { color: var(--accent); font-weight: 600; }
-select, input[type=text] { font: inherit; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+select, input[type=text], input[type=password] { font: inherit; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
 input[type=range] { accent-color: var(--accent); }
 
 button { font: inherit; border-radius: 8px; padding: 9px 12px; cursor: pointer; border: 1px solid transparent; }
@@ -48,3 +48,22 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .primary { background: var(--accent); color: #fff; font-weight: 600; }
 .ghost, .icon { background: transparent; color: var(--text); border-color: var(--line); padding: 4px 10px; font-size: 12px; }
 .summary { background: var(--accent-2); border-radius: 8px; padding: 10px; font-size: 13px; }
+
+.top-right { display: flex; align-items: center; gap: 12px; }
+.pro-btn { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; font-weight: 700; padding: 6px 12px; font-size: 13px; border: 0; border-radius: 8px; cursor: pointer; }
+.pro-btn.is-pro { background: var(--line); color: var(--text); cursor: default; }
+.pro-btn[hidden] { display: none; }
+.badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .5px; padding: 1px 6px; border-radius: 999px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; vertical-align: middle; }
+body.is-pro .badge, body.pro-off .badge { display: none; }
+.check { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.pro-dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--text); padding: 22px; max-width: 420px; width: calc(100% - 32px); }
+.pro-dialog::backdrop { background: rgba(0, 0, 0, .5); }
+.pro-dialog h2 { margin: 0 0 4px; }
+.muted { color: var(--muted); font-size: 13px; }
+.pro-list { padding-left: 18px; line-height: 1.9; }
+.pro-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.pro-msg { background: var(--accent-2); border-radius: 8px; padding: 10px; font-size: 13px; }
+.promo { display: flex; gap: 10px; align-items: center; margin-top: 4px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 12px; text-decoration: none; }
+.promo strong { color: var(--text); font-size: 13px; }
+.promo:hover { border-color: var(--accent, #e5484d); }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }

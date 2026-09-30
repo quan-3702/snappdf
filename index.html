@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SnapPDF – Image to PDF Converter</title>
-  <meta name="description" content="Combine JPG, PNG and WebP images into one PDF. Reorder, rotate, choose page size. Works offline – files never leave your PC.">
+  <meta name="description" content="Combine JPG, PNG and WebP images into one PDF. Reorder, rotate, choose page size, scan documents, compress to a target size. Works offline – files never leave your PC.">
   <meta name="theme-color" content="#e5484d">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
@@ -16,8 +16,29 @@
       <img src="icon-192.png" alt="" width="28" height="28">
       <span>SnapPDF</span>
     </div>
-    <span class="tag">100% offline · files never leave your PC</span>
+    <div class="top-right">
+      <span class="tag">100% offline · files never leave your PC</span>
+      <button id="proBtn" class="pro-btn" hidden>★ Get Pro</button>
+    </div>
   </header>
+
+  <dialog id="proDialog" class="pro-dialog">
+    <h2>SnapPDF Pro</h2>
+    <p class="muted">One-time purchase. Yours forever on this Microsoft account.</p>
+    <ul class="pro-list">
+      <li><strong>Unlimited</strong> pages per PDF <span class="muted">(Free: 10)</span></li>
+      <li><strong>Compress to a size</strong> – e.g. under 1 MB for online forms</li>
+      <li><strong>Scan mode</strong> – clean black &amp; white documents from photos</li>
+      <li><strong>Watermark</strong> and <strong>page numbers</strong></li>
+      <li><strong>Password-protect</strong> your PDF</li>
+    </ul>
+    <p id="proMsg" class="pro-msg" hidden></p>
+    <div class="pro-actions">
+      <button id="buyBtn" class="primary">Unlock Pro</button>
+      <button id="restoreBtn" class="ghost">Restore purchase</button>
+      <button id="closePro" class="ghost">Not now</button>
+    </div>
+  </dialog>
 
   <main class="layout">
     <section>
@@ -71,8 +92,36 @@
         </select>
       </label>
 
-      <label class="field">Image quality <output id="qualityOut">85</output>
+      <label class="field">Color
+        <select id="mode">
+          <option value="color" selected>Original colors</option>
+          <option value="gray">Grayscale</option>
+          <option value="scan">Scan document (B&amp;W) ★ Pro</option>
+        </select>
+      </label>
+
+      <label class="field">PDF size <span class="badge">PRO</span>
+        <select id="target">
+          <option value="0" selected>No limit – best quality</option>
+          <option value="500">Under 500 KB</option>
+          <option value="1024">Under 1 MB</option>
+          <option value="2048">Under 2 MB</option>
+          <option value="5120">Under 5 MB</option>
+        </select>
+      </label>
+
+      <label class="field" id="qualityField">Image quality <output id="qualityOut">85</output>
         <input id="quality" type="range" min="30" max="100" value="85">
+      </label>
+
+      <label class="field">Watermark <span class="badge">PRO</span>
+        <input id="wmText" type="text" value="" placeholder="e.g. COPY – leave empty for none">
+      </label>
+
+      <label class="check"><input id="pageNums" type="checkbox"> Page numbers <span class="badge">PRO</span></label>
+
+      <label class="field">Password <span class="badge">PRO</span>
+        <input id="password" type="password" value="" placeholder="Leave empty for no password" autocomplete="new-password">
       </label>
 
       <label class="field">File name
@@ -81,6 +130,11 @@
 
       <button id="make" class="primary" disabled>Create PDF</button>
       <div id="summary" class="summary" hidden></div>
+
+      <a class="promo" href="https://apps.microsoft.com/detail/9P25KDSFDB0N" target="_blank" rel="noopener">
+        <img src="https://quan-3702.github.io/pixelbatch/icon-192.png" alt="" width="28" height="28">
+        <span><strong>PixelBatch</strong><br>Resize, compress &amp; convert images (HEIC → JPG)</span>
+      </a>
     </aside>
   </main>
 

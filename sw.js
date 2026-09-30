@@ -1,4 +1,4 @@
-const CACHE = 'snappdf-v1';
+const CACHE = 'snappdf-v2';
 const ASSETS = ['./', 'index.html', 'style.css', 'app.js', 'manifest.json',
   'icon-192.png', 'icon-512.png'];
 
