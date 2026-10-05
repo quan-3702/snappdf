@@ -1,5 +1,5 @@
-const CACHE = 'snappdf-v3';
-const ASSETS = ['./', 'index.html', 'style.css', 'app.js', 'manifest.json',
+const CACHE = 'snappdf-v4';
+const ASSETS = ['./', 'index.html', 'help.html', 'style.css', 'app.js', 'manifest.json',
   'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
