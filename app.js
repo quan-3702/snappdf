@@ -17,7 +17,21 @@ let proAvailable = false; // Pro limits apply only when the Store actually sells
 proAvailable = true; // owner's rule: Pro is never free – free limits apply everywhere (website, Store, offline) until Pro is bought
 let proSku = PRO_SKU;
 let isPro = false;
-try { isPro = localStorage.getItem('snappdf-pro') === '1'; } catch (_) {}
+// saved Pro flag: the website never trusts it (web visitors cannot buy there); the Store app trusts it for 30 days after the Store last confirmed the purchase
+const HAS_STORE = typeof window !== 'undefined' && 'getDigitalGoodsService' in window, PRO_OK_DAYS = 30;
+function cachedPro() {
+  try {
+    if (!HAS_STORE || localStorage.getItem('snappdf-pro') !== '1') return false;
+    const ok = localStorage.getItem('snappdf-pro-ok'), now = Date.now();
+    if (ok === null) { localStorage.setItem('snappdf-pro-ok', String(now)); return true; } // saved by an older version: counts as confirmed now, once
+    const t = Number(ok);
+    return t > 0 && t <= now + 86400000 && now - t < PRO_OK_DAYS * 86400000; // a date in the future or garbage is not trusted
+  } catch (_) { return false; }
+}
+function storePro(owned) { // only when the Store really answered
+  try { if (owned) { localStorage.setItem('snappdf-pro', '1'); localStorage.setItem('snappdf-pro-ok', String(Date.now())); } else { localStorage.removeItem('snappdf-pro'); localStorage.removeItem('snappdf-pro-ok'); } } catch (_) {}
+}
+isPro = cachedPro();
 const unlocked = () => isPro || !proAvailable;
 
 async function billing() {
@@ -27,7 +41,6 @@ async function billing() {
 
 function setPro(v) {
   isPro = v;
-  try { localStorage.setItem('snappdf-pro', v ? '1' : '0'); } catch (_) {}
   document.body.classList.toggle('is-pro', v);
   document.body.classList.toggle('pro-off', !proAvailable && !v);
   const b = $('proBtn');
@@ -54,7 +67,7 @@ async function checkPro() {
     if (details[0]) proSku = details[0].itemId;
     const list = await svc.listPurchases();
     const owned = list.some((p) => PRO_IDS.includes(p.itemId));
-    if (owned || details.length) { setPro(owned); return owned; }
+    if (owned || details.length) { storePro(owned); setPro(owned); return owned; }
     setPro(isPro); // Store did not answer (offline): keep what we knew
     return isPro;
   } catch (_) { return isPro; }
@@ -440,11 +453,11 @@ function settings() {
   };
 }
 
-async function renderPages(s, o, onPage) {
+async function renderPages(list, s, o, onPage) {
   const out = [];
-  for (let i = 0; i < pages.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     onPage(i);
-    const img = await prepare(pages[i], o);
+    const img = await prepare(list[i], o);
     const { pw, ph, m } = pageFor(img, s);
     const k = Math.min((pw - 2 * m) / img.w, (ph - 2 * m) / img.h);
     const dw = img.w * k, dh = img.h * k;
@@ -456,6 +469,7 @@ async function renderPages(s, o, onPage) {
 async function makePdf() {
   const s = settings();
   if (needsPro(s)) return;
+  const list = pages.slice(); // pages added while the PDF is being made must not slip past the free limit
   const btn = $('make');
   const sum = $('summary');
   btn.disabled = true;
@@ -464,8 +478,8 @@ async function makePdf() {
     let out, pass = 0, blob, note = '';
     for (;;) {
       pass++;
-      out = await renderPages(s, o, (i) => {
-        btn.textContent = `${pass > 1 ? `Compressing (pass ${pass}) · ` : ''}page ${i + 1}/${pages.length}…`;
+      out = await renderPages(list, s, o, (i) => {
+        btn.textContent = `${pass > 1 ? `Compressing (pass ${pass}) · ` : ''}page ${i + 1}/${list.length}…`;
       });
       blob = buildPdf(out, s);
       if (!s.target || blob.size <= s.target) break;
@@ -480,7 +494,7 @@ async function makePdf() {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);
     sum.hidden = false;
-    sum.innerHTML = `<strong></strong> · ${pages.length} page${pages.length > 1 ? 's' : ''} · ${fmtBytes(blob.size)}${s.password ? ' · 🔒 password protected' : ''}${note}`;
+    sum.innerHTML = `<strong></strong> · ${list.length} page${list.length > 1 ? 's' : ''} · ${fmtBytes(blob.size)}${s.password ? ' · 🔒 password protected' : ''}${note}`;
     sum.querySelector('strong').textContent = name;
   } catch (e) {
     sum.hidden = false;
