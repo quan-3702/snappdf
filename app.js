@@ -14,6 +14,7 @@ const PRO_SKU = 'snappdf_pro';
 const PRO_IDS = [PRO_SKU, '9PCWXWLK1FJQ']; // product ID or Store ID, whichever the Store reports
 const STORE_URL = 'https://apps.microsoft.com/detail/9NF418NKG80Z';
 let proAvailable = false; // Pro limits apply only when the Store actually sells the add-on
+try { if ('getDigitalGoodsService' in window && localStorage.getItem('snappdf-proavail') === '1') proAvailable = true; } catch (_) {} // keep Pro limits when offline
 let proSku = PRO_SKU;
 let isPro = false;
 try { isPro = localStorage.getItem('snappdf-pro') === '1'; } catch (_) {}
@@ -37,17 +38,26 @@ function setPro(v) {
   scanOpt.textContent = unlocked() ? 'Scan document (B&W)' : 'Scan document (B&W) ★ Pro';
 }
 
+async function checkProAfterBuy() {
+  for (let i = 0; i < 6; i++) {
+    if (await checkPro()) return true;
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  proMessage('Thank you! If Pro is not unlocked within a minute, click “Restore purchase”.');
+  return false;
+}
 async function checkPro() {
   const svc = await billing();
   if (!svc) return false;
   try {
     const details = await svc.getDetails(PRO_IDS).catch(() => []);
-    proAvailable = details.length > 0;
+    if (details.length) { proAvailable = true; try { localStorage.setItem('snappdf-proavail', '1'); } catch (_) {} }
     if (details[0]) proSku = details[0].itemId;
     const list = await svc.listPurchases();
     const owned = list.some((p) => PRO_IDS.includes(p.itemId));
-    setPro(owned);
-    return owned;
+    if (owned || details.length) { setPro(owned); return owned; }
+    setPro(isPro); // Store did not answer (offline): keep what we knew
+    return isPro;
   } catch (_) { return isPro; }
 }
 
@@ -85,7 +95,7 @@ async function buyPro() {
     proMessage('Purchase could not be completed: ' + (e.message || e));
     return;
   }
-  if (await checkPro()) {
+  if (await checkProAfterBuy()) {
     proMessage('Thank you! Pro is unlocked. ★');
     setTimeout(() => $('proDialog').close(), 1500);
   }
@@ -485,7 +495,7 @@ async function makePdf() {
 const drop = $('drop');
 ['dragenter', 'dragover'].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', (ev) => addFiles(ev.dataTransfer.files));
+drop.addEventListener('drop', (ev) => { ev.stopPropagation(); addFiles(ev.dataTransfer.files); }); // the document handler below would add them a second time
 drop.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') $('picker').click(); });
 $('picker').addEventListener('change', (ev) => { addFiles(ev.target.files); ev.target.value = ''; });
 document.addEventListener('dragover', (e) => { if (dragId === null) e.preventDefault(); });
